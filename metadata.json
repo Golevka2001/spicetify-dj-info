@@ -1,0 +1,42 @@
+{
+  "name": "spicetify-dj-info",
+  "kind": "extension",
+  "version": "0.1.0",
+  "authors": ["L3N0X", "Golevka2001"],
+  "description": "Show Key, BPM, Energy, Popularity, Danceability and Year for each track!",
+  "entries": {
+    "js": "index.js",
+    "css": "index.css"
+  },
+  "hasMixins": false,
+  "dependencies": {
+    "stdlib": "^1.10.4"
+  },
+  "stdlibBoundary": {
+    "exceptions": [
+      {
+        "file": "mod.ts",
+        "rules": ["client-dom"],
+        "reason": "Anchors the now-playing info line and tracklists on Spotify's own main-* semantic classes and data-testids; there is no classmap path for these containers."
+      },
+      {
+        "file": "src/features/tracklist.ts",
+        "rules": ["client-dom"],
+        "reason": "Inserts the DJ Info column into Spotify's tracklist grid and reads the row sections via main-trackList-* classes."
+      },
+      {
+        "file": "src/features/queue.ts",
+        "rules": ["client-dom"],
+        "reason": "Re-checks queued rows against the recommended-track data-testid before rendering."
+      },
+      {
+        "file": "src/ui/settingsModal.ts",
+        "rules": ["direct-map"],
+        "reason": "The profile-menu settings entry is drawn as a plain button carrying MAP.context_menu.menu_item, so it renders without the client's menu React context."
+      }
+    ]
+  },
+  "preview": "https://raw.githubusercontent.com/L3-N0X/spicetify-dj-info/main/img/preview.png",
+  "repository": "https://github.com/L3-N0X/spicetify-dj-info",
+  "license": "MIT"
+}

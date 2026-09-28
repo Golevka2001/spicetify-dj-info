@@ -1,20 +1,21 @@
+import protobuf from 'protobufjs/light';
+import { client } from '/modules/stdlib/mod.ts';
+
 import {
   extendedMetadataJsonDescriptor,
   trackMetadataJsonDescriptor,
-} from '../constants/protobuf.mjs';
-import { trackDb, idb, DjTrackInfo } from '../db/trackDb.mjs';
+} from '../constants/protobuf.ts';
+import { trackDb, idb, DjTrackInfo } from '../db/trackDb.ts';
 
 let extendedMetadataRequest = null;
 let trackMetadataResponse = null;
 
 function getProtobufTypes() {
   if (!extendedMetadataRequest) {
-    extendedMetadataRequest = globalThis.protobuf.Root.fromJSON(
-      extendedMetadataJsonDescriptor,
-    ).lookup('Message');
-    trackMetadataResponse = globalThis.protobuf.Root.fromJSON(trackMetadataJsonDescriptor).lookup(
+    extendedMetadataRequest = protobuf.Root.fromJSON(extendedMetadataJsonDescriptor).lookup(
       'Message',
     );
+    trackMetadataResponse = protobuf.Root.fromJSON(trackMetadataJsonDescriptor).lookup('Message');
   }
   return {
     extendedMetadataRequest,
@@ -26,7 +27,7 @@ let country = 'US';
 let catalogue = 'premium';
 
 export async function initProductState() {
-  const productStateValues = await Spicetify.Platform.ProductStateAPI.getValues();
+  const productStateValues = await client.platform.ProductStateAPI.getValues();
   country = productStateValues['country'] ?? 'US';
   catalogue = productStateValues['catalogue'] ?? 'premium';
 }
@@ -53,11 +54,10 @@ export async function getExtendedMetadata(entity_uris, extension_kind) {
       body: payload,
       headers: {
         'Content-Type': 'application/protobuf',
-        Authorization: `Bearer ${Spicetify.Platform.AuthorizationAPI.getState().token.accessToken}`,
-        'Spotify-App-Version': Spicetify.Platform.version,
-        'App-Platform': Spicetify.Platform.PlatformData.app_platform,
+        Authorization: `Bearer ${client.platform.AuthorizationAPI.getState().token.accessToken}`,
+        'Spotify-App-Version': client.platform.version,
+        'App-Platform': client.platform.PlatformData.app_platform,
       },
-      timeout: 1000 * 15,
     },
   );
 
@@ -96,9 +96,9 @@ function normalizeFeatures(features, id) {
 
 function authHeaders() {
   return {
-    Authorization: `Bearer ${Spicetify.Platform.AuthorizationAPI.getState().token.accessToken}`,
-    'Spotify-App-Version': Spicetify.Platform.version,
-    'App-Platform': Spicetify.Platform.PlatformData.app_platform,
+    Authorization: `Bearer ${client.platform.AuthorizationAPI.getState().token.accessToken}`,
+    'Spotify-App-Version': client.platform.version,
+    'App-Platform': client.platform.PlatformData.app_platform,
     Accept: 'application/json',
   };
 }

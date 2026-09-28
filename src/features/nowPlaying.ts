@@ -1,6 +1,8 @@
-import { CONFIG } from '../ui/config.mjs';
-import { getTrackInfo } from '../api/metadata.mjs';
-import { getKeyInNotation } from '../utils/track.mjs';
+import { client } from '/modules/stdlib/mod.ts';
+
+import { CONFIG } from '../ui/config.ts';
+import { getTrackInfo } from '../api/metadata.ts';
+import { getKeyInNotation } from '../utils/track.ts';
 
 let nowPlayingWidgetdjInfoData = null;
 
@@ -16,8 +18,8 @@ export async function updateNowPlayingWidget() {
   if (!nowPlayingWidgetdjInfoData || !CONFIG.isNowPlayingEnabled) return;
 
   const getTrackUri = () => {
-    if (!Spicetify.Player.data || !Spicetify.Player.data.item) return null;
-    return Spicetify.Player.data.item.uri;
+    if (!client.player.data || !client.player.data.item) return null;
+    return client.player.data.item.uri;
   };
 
   const trackUri = getTrackUri();
@@ -72,7 +74,7 @@ export async function updateNowPlayingWidget() {
 }
 
 export function initNowPlayingListener() {
-  Spicetify.Player.addEventListener('songchange', () => {
+  client.player.addEventListener('songchange', () => {
     updateNowPlayingWidget();
   });
 }

@@ -1,3 +1,5 @@
+import { client } from '/modules/stdlib/mod.ts';
+
 export class DjTrackInfo {
   static fromQueries(res, resTrack) {
     return {
@@ -26,16 +28,16 @@ export const idb = {
   initPromise: null,
   init: () => {
     if (idb.initPromise) return idb.initPromise;
-    idb.initPromise = new Promise((resolve, reject) => {
+    idb.initPromise = new Promise<void>((resolve, reject) => {
       const request = indexedDB.open('dj-info-idb', 1);
       request.onupgradeneeded = (event) => {
-        const db = event.target.result;
+        const db = (event.target as IDBRequest).result;
         if (!db.objectStoreNames.contains('tracks')) {
           db.createObjectStore('tracks', { keyPath: 'id' });
         }
       };
       request.onsuccess = (event) => {
-        idb.db = event.target.result;
+        idb.db = (event.target as IDBRequest).result;
         resolve();
       };
       request.onerror = (event) => {
@@ -47,7 +49,7 @@ export const idb = {
   },
   clear: async () => {
     if (!idb.db) await idb.init();
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       const transaction = idb.db.transaction(['tracks'], 'readwrite');
       const store = transaction.objectStore('tracks');
       const request = store.clear();
@@ -57,7 +59,7 @@ export const idb = {
   },
   get: async (id) => {
     if (!idb.db) await idb.init();
-    return new Promise((resolve) => {
+    return new Promise<any>((resolve) => {
       const transaction = idb.db.transaction(['tracks'], 'readonly');
       const store = transaction.objectStore('tracks');
       const request = store.get(id);
@@ -68,10 +70,10 @@ export const idb = {
   getMany: async (ids) => {
     // Helper to get multiple items
     if (!idb.db) await idb.init();
-    return new Promise((resolve) => {
+    return new Promise<Array<{ id: string; val: any }>>((resolve) => {
       const transaction = idb.db.transaction(['tracks'], 'readonly');
       const store = transaction.objectStore('tracks');
-      const results = [];
+      const results: Array<{ id: string; val: any }> = [];
       let completed = 0;
 
       if (ids.length === 0) return resolve([]);
@@ -93,7 +95,7 @@ export const idb = {
   setMany: async (items) => {
     // items: [{id, val}]
     if (!idb.db) await idb.init();
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       const transaction = idb.db.transaction(['tracks'], 'readwrite');
       const store = transaction.objectStore('tracks');
       items.forEach((item) => store.put({ id: item.id, val: item.val }));
@@ -106,7 +108,7 @@ export const idb = {
 // Migration from LocalStorage to IndexedDB
 async function migrateLocalStorage() {
   const LS_KEY = 'dj-info-tracks';
-  const rawData = Spicetify.LocalStorage.get(LS_KEY);
+  const rawData = client.storage.get(LS_KEY);
   if (!rawData) return;
 
   console.log('DJ Info: Migrating LocalStorage to IndexedDB...');
@@ -143,7 +145,7 @@ async function migrateLocalStorage() {
       console.log(`DJ Info: Migrated ${itemsToStore.length} tracks.`);
     }
 
-    Spicetify.LocalStorage.remove(LS_KEY);
+    client.storage.remove(LS_KEY);
     console.log('DJ Info: LocalStorage cleaned.');
   } catch (e) {
     console.error('DJ Info: Migration failed', e);
@@ -152,13 +154,13 @@ async function migrateLocalStorage() {
 
 export function cleanupOldStorage() {
   const keysToRemove = [];
-  for (let i = 0; i < Spicetify.LocalStorage.length; i++) {
-    const key = Spicetify.LocalStorage.key(i);
-    if (key.startsWith('djinfo-') && key !== 'dj-info-tracks' && key !== 'dj-info-config') {
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key?.startsWith('djinfo-') && key !== 'dj-info-tracks' && key !== 'dj-info-config') {
       keysToRemove.push(key);
     }
   }
-  keysToRemove.forEach((key) => Spicetify.LocalStorage.remove(key));
+  keysToRemove.forEach((key) => client.storage.remove(key));
   if (keysToRemove.length > 0) {
     console.log('DJ Info: Cleaned up old/legacy keys.');
   }

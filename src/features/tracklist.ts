@@ -1,6 +1,6 @@
-import { CONFIG } from '../ui/config.mjs';
-import { trackDb } from '../db/trackDb.mjs';
-import { getTracklistTrackUri, getKeyInNotation } from '../utils/track.mjs';
+import { CONFIG } from '../ui/config.ts';
+import { trackDb } from '../db/trackDb.ts';
+import { getTracklistTrackUri, getKeyInNotation } from '../utils/track.ts';
 import {
   fourColumnGridCss,
   fiveColumnGridCss,
@@ -13,7 +13,7 @@ import {
   recommendationGridCss,
   richEightColumnGridCss,
   eightColumnGridCss,
-} from '../constants/grid.mjs';
+} from '../constants/grid.ts';
 
 let queueTrackInfoFn = null;
 
@@ -21,7 +21,7 @@ export function setQueueTrackInfo(fn) {
   queueTrackInfoFn = fn;
 }
 
-const getVisibleColumnCount = (row) => {
+const getVisibleColumnCount = (row: HTMLElement) => {
   let count = 0;
   const children = Array.from(row.children);
   for (const child of children) {
@@ -43,7 +43,7 @@ const getVisibleColumnCount = (row) => {
   return count;
 };
 
-const getDjInfoInsertionAnchor = (row) => {
+const getDjInfoInsertionAnchor = (row: HTMLElement) => {
   const children = Array.from(row.children);
   const lastNativeVariableColumn = children.reverse().find((child) => {
     return (
@@ -58,12 +58,13 @@ const getDjInfoInsertionAnchor = (row) => {
   );
 };
 
-const updateTrackGrid = (track, isRecommendation) => {
+const updateTrackGrid = (track: HTMLElement, isRecommendation: boolean) => {
   const MIN_WIDTH = 550;
   const width = window.innerWidth;
 
   let djInfoColumn =
-    track.querySelector('.djInfoList') || track.querySelector('.djinfoheader')?.parentElement;
+    track.querySelector<HTMLElement>('.djInfoList') ||
+    track.querySelector('.djinfoheader')?.parentElement;
 
   if (width < MIN_WIDTH && !isRecommendation) {
     if (djInfoColumn) {
@@ -130,7 +131,7 @@ const updateTrackGrid = (track, isRecommendation) => {
   }
 };
 
-export function addInfoToTrack(track, isRecommendation = false) {
+export function addInfoToTrack(track: HTMLElement, isRecommendation = false) {
   const hasdjinfo = track.querySelector('.djinfo') !== null;
   const trackUri = getTracklistTrackUri(track);
 
@@ -144,7 +145,7 @@ export function addInfoToTrack(track, isRecommendation = false) {
     isRecommendation = track.closest('[data-testid="recommended-track"]') !== null;
   }
 
-  let djInfoColumn = track.querySelector('.djInfoList');
+  let djInfoColumn = track.querySelector<HTMLElement>('.djInfoList');
   if (!djInfoColumn) {
     let insertionAnchor = getDjInfoInsertionAnchor(track);
     if (insertionAnchor) {
@@ -330,11 +331,16 @@ export function addInfoToTrack(track, isRecommendation = false) {
   }
 }
 
-export function updateTracklist(tracklist, trackIntersectionObserver) {
+export function updateTracklist(
+  tracklist: HTMLElement,
+  trackIntersectionObserver: IntersectionObserver,
+) {
   if (!CONFIG.isPlaylistEnabled) return;
   if (!tracklist) return;
 
-  const tracklistHeader = tracklist.querySelector('.main-trackList-trackListHeaderRow');
+  const tracklistHeader = tracklist.querySelector<HTMLElement>(
+    '.main-trackList-trackListHeaderRow',
+  );
   if (tracklistHeader && !tracklistHeader.querySelector('.djinfoheader')) {
     let insertionAnchor = getDjInfoInsertionAnchor(tracklistHeader);
     let visibleCols = getVisibleColumnCount(tracklistHeader);
@@ -413,7 +419,10 @@ export function updateTracklist(tracklist, trackIntersectionObserver) {
   }
 }
 
-export function updateRecommendations(recommendations, trackIntersectionObserver) {
+export function updateRecommendations(
+  recommendations: HTMLElement,
+  trackIntersectionObserver: IntersectionObserver,
+) {
   if (!CONFIG.isRecommendationsEnabled) return;
   if (!recommendations) return;
 

@@ -1,6 +1,8 @@
-import { CONFIG, saveConfig } from './config.mjs';
+import { client } from '/modules/stdlib/mod.ts';
 
-const getReact = () => Spicetify.React;
+import { CONFIG, saveConfig } from './config.ts';
+
+const getReact = () => client.react;
 
 export const DisplayIcon = ({ icon, size }) => {
   const react = getReact();
@@ -38,7 +40,7 @@ export const ConfigItem = ({ name, field, disabled = false }) => {
           },
         },
         react.createElement(DisplayIcon, {
-          icon: Spicetify.SVGIcons.check,
+          icon: client.icons.check,
           size: 16,
         }),
       ),

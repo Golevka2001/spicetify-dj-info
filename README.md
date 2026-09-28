@@ -14,60 +14,16 @@ Welcome to the Spicetify DJ Info Extension! This extension enhances your Spiceti
 
 ## 💻 Installation
 
-Copy `dist/djinfo.mjs` into your [Spicetify](https://github.com/spicetify/spicetify-cli) extensions directory:
-
-| **Platform** | **Path**                                                                             |
-| ------------ | ------------------------------------------------------------------------------------ |
-| **Linux**    | `~/.config/spicetify/Extensions` or `$XDG_CONFIG_HOME/.config/spicetify/Extensions/` |
-| **MacOS**    | `~/.config/spicetify/Extensions` or `$SPICETIFY_CONFIG/Extensions`                   |
-| **Windows**  | `%appdata%/spicetify/Extensions/`                                                    |
-
-After putting the extension file into the correct folder, run the following command to install the extension:
+Install the module from the Spicetify Marketplace (search for "DJ Info"), or with a packed build attached to a release:
 
 ```bash
-spicetify config extensions djinfo.mjs
-spicetify apply
+spicetify pkg install spicetify-dj-info <url-to-zip>
 ```
-
-Or you can manually edit your `config-xpui.ini` file. Add your desired extension filenames in the extensions key, separated them by the | character.
-Example:
-
-```ini
-[AdditionalOptions]
-...
-extensions = autoSkipExplicit.js|shuffle+.js|trashbin.js|djinfo.mjs
-```
-
-Then run:
-
-```bash
-spicetify apply
-```
-
-**May cause issues with Star Ratings!**
 
 ## ❌ Uninstallation
 
-Run the following command to uninstall the extension (note the - on the end):
-
 ```bash
-spicetify config extensions djinfo.mjs-
-spicetify apply
-```
-
-You can also manually edit your `config-xpui.ini` file. Just remove the extensions' filename completely.
-Example:
-
-```ini
-[AdditionalOptions]
-...
-extensions = autoSkipExplicit.js|shuffle+.js|trashbin.js
-```
-
-Then run:
-
-```bash
-spicetify apply
+spicetify pkg uninstall spicetify-dj-info
 ```
 
 ## ⚙️ Settings

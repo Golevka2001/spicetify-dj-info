@@ -1,8 +1,10 @@
-import { CONFIG } from '../ui/config.mjs';
+import { client } from '/modules/stdlib/mod.ts';
 
-export function getTracklistTrackUri(tracklistElement) {
+import { CONFIG } from '../ui/config.ts';
+
+export function getTracklistTrackUri(tracklistElement: Element) {
   // 1. Try specific known paths first (Fast & Reliable for standard rows)
-  const values = Object.values(tracklistElement);
+  const values: any[] = Object.values(tracklistElement);
   const reactProps = values.find((v) => v?.pendingProps || v?.memoizedProps);
   const props = reactProps?.pendingProps || reactProps?.memoizedProps;
 
@@ -52,7 +54,7 @@ export function getTracklistTrackUri(tracklistElement) {
 }
 
 export function getPageType() {
-  const pathname = Spicetify.Platform.History.location.pathname;
+  const pathname = client.platform.History.location.pathname;
   let matches = null;
   if (pathname === '/collection/tracks') {
     return ['LIKED_SONGS', null];

@@ -1,3 +1,5 @@
+import { client } from '/modules/stdlib/mod.ts';
+
 const DEFAULT_CONFIG = {
   isPlaylistEnabled: true,
   isNowPlayingEnabled: true,
@@ -24,7 +26,7 @@ export let CONFIG;
 
 export function loadConfig() {
   try {
-    CONFIG = JSON.parse(Spicetify.LocalStorage.get('dj-info-config') || 'error');
+    CONFIG = JSON.parse(client.storage.get('dj-info-config') || 'error');
 
     // Ensure all new keys exist
     Object.keys(DEFAULT_CONFIG).forEach((key) => {
@@ -38,5 +40,5 @@ export function loadConfig() {
 }
 
 export function saveConfig() {
-  Spicetify.LocalStorage.set('dj-info-config', JSON.stringify(CONFIG));
+  client.storage.set('dj-info-config', JSON.stringify(CONFIG));
 }

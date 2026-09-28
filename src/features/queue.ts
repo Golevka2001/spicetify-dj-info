@@ -1,5 +1,5 @@
-import { trackDb } from '../db/trackDb.mjs';
-import { getTrackInfoBatch } from '../api/metadata.mjs';
+import { trackDb } from '../db/trackDb.ts';
+import { getTrackInfoBatch } from '../api/metadata.ts';
 
 export const trackInfoQueue = new Map();
 let trackInfoTimeout = null;

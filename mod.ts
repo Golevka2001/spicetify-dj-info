@@ -1,44 +1,47 @@
-import protobuf from 'protobufjs/light';
+import { client, createRegistrar } from '/modules/stdlib/mod.ts';
+import type { ModuleRuntimeContext } from '/modules/stdlib/mod.ts';
 
-// expose globally for API module
-globalThis.protobuf = protobuf;
+declare global {
+  interface Window {
+    djInfoObserver?: IntersectionObserver;
+    djInfoMutationObserver?: MutationObserver;
+  }
+}
 
-import { debounce } from './utils/dom.mjs';
-import { initStyles } from './ui/styles.mjs';
-import { CONFIG, loadConfig } from './ui/config.mjs';
-import { registerSettingsMenu } from './ui/settingsModal.mjs';
-import { initTrackDb } from './db/trackDb.mjs';
-import { initProductState } from './api/metadata.mjs';
-import { queueTrackInfo, setAddInfoToTrack } from './features/queue.mjs';
+import { debounce } from './src/utils/dom.ts';
+import { CONFIG, loadConfig } from './src/ui/config.ts';
+import { registerSettingsMenu } from './src/ui/settingsModal.ts';
+import { initTrackDb } from './src/db/trackDb.ts';
+import { initProductState } from './src/api/metadata.ts';
+import { queueTrackInfo, setAddInfoToTrack } from './src/features/queue.ts';
 import {
   addInfoToTrack,
   updateTracklist,
   updateRecommendations,
   setQueueTrackInfo,
-} from './features/tracklist.mjs';
+} from './src/features/tracklist.ts';
 import {
   updateNowPlayingWidget,
   initNowPlayingListener,
   setNowPlayingElement,
-  getNowPlayingElement,
-} from './features/nowPlaying.mjs';
+} from './src/features/nowPlaying.ts';
 
-(async function djInfoList() {
-  while (!Spicetify.showNotification) {
+export default async function (ctx: ModuleRuntimeContext) {
+  while (!client.notify) {
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
 
-  const { CosmosAsync, URI } = Spicetify;
+  const { cosmos: CosmosAsync, uri: URI } = client;
   if (!(CosmosAsync && URI)) {
-    setTimeout(djInfoList, 300);
     return;
   }
 
   loadConfig();
-  initStyles();
   initTrackDb();
   await initProductState();
-  registerSettingsMenu();
+
+  const registrar = createRegistrar(ctx);
+  registerSettingsMenu(registrar);
 
   setQueueTrackInfo(queueTrackInfo);
   setAddInfoToTrack(addInfoToTrack);
@@ -52,7 +55,7 @@ import {
     (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          const track = entry.target;
+          const track = entry.target as HTMLElement;
           const isRecommendation = track.closest('[data-testid="recommended-track"]') !== null;
           addInfoToTrack(track, isRecommendation);
           trackIntersectionObserver.unobserve(track);
@@ -89,16 +92,18 @@ import {
   }
 
   function main() {
-    const tracklists = document.querySelectorAll('.main-trackList-indexable');
+    const tracklists = document.querySelectorAll<HTMLElement>('.main-trackList-indexable');
     tracklists.forEach((tracklist) => observeTracklist(tracklist, false));
 
-    const recommendationsContainer = document.querySelector('[data-testid="recommended-track"]');
+    const recommendationsContainer = document.querySelector<HTMLElement>(
+      '[data-testid="recommended-track"]',
+    );
     if (recommendationsContainer) {
       observeTracklist(recommendationsContainer, true);
     }
 
     oldNowPlayingWidget = nowPlayingWidget;
-    nowPlayingWidget = document.querySelector('.main-nowPlayingWidget-nowPlaying');
+    nowPlayingWidget = document.querySelector<HTMLElement>('.main-nowPlayingWidget-nowPlaying');
 
     if (nowPlayingWidget && !nowPlayingWidget.isEqualNode(oldNowPlayingWidget)) {
       if (!nowPlayingWidget.querySelector('.dj-info-now-playing')) {
@@ -137,4 +142,9 @@ import {
     subtree: true,
   });
   window.djInfoMutationObserver = observer;
-})();
+
+  ctx.defer(() => {
+    observer.disconnect();
+    trackIntersectionObserver.disconnect();
+  });
+}
